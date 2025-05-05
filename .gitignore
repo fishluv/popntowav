@@ -1,4 +1,10 @@
 ffmpeg.exe
 ifstools.exe
+
+.DS_Store
 .vscode/launch.json
+
 node_modules/
+output/
+
+*.ifs
