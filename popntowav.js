@@ -5,7 +5,7 @@ const Twodx = require("./twodx");
 const child_process = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const SampleRate = require("node-libsamplerate");
+const LibSampleRate = require('@alexanderolsen/libsamplerate-js');
 const wav = require("wav");
 
 if (process.argv.length < 3) {
@@ -45,25 +45,22 @@ const bytes = 4;
 //aren't 44.1KHz, since they'll mess everything up.
 //Best resampling option I could find was node-libsamplerate.
 //I'm sure other people have better suggestions.
-for (var i = 0; i<decodedKeysounds.length; i++) {
-    let keysound = decodedKeysounds[i];
+function resample(keysound) {
     if (keysound.samplingRate != samplingRate) {
-        let options = {
-            type: 0,
-            channels: 2,
-            fromDepth: 16,
-            toDepth: 16,
-            fromRate: keysound.samplingRate,
-            toRate: samplingRate
-        }
-        const resample = new SampleRate(options);
-        
-        resample.write(keysound.data);
-        keysound.data = Buffer.from(resample.read());
+        return LibSampleRate.create(channels, keysound.samplingRate, samplingRate, {
+            converterType: LibSampleRate.ConverterType.SRC_SINC_BEST_QUALITY,
+        }).then((src) => {
+            let inputFloatData = new Float32Array(keysound.data);
+            let outputFloatData = src.simple(inputFloatData);
+            keysound.data = Buffer.from(outputFloatData);
+            src.destroy(); // clean up
+        });
+    } else {
+        return keysound;
     }
-    decodedKeysounds[i] = keysound;
 }
 
+Promise.all(decodedKeysounds.map(resample)).then(resampledKeysounds => {
 //Gotta find the proper endOfSong
 //Trying to do this by getting the largest offset,
 //and then adding its associated keysound length
@@ -72,7 +69,7 @@ let buffSize = 0;
 for (const event of chart.playEvents) {
     const [offset, keysoundNo] = event;
     let off = parseInt((offset*samplingRate)/1000)*channels*bytes;
-    const keysound = decodedKeysounds[keysoundNo];
+    const keysound = resampledKeysounds[keysoundNo];
     if (keysound) {
         if ((off + (keysound.data.length)*2) > buffSize) {
             buffSize = off + (keysound.data.length*2);
@@ -88,7 +85,7 @@ for (const event of chart.playEvents) {
     const [offset, keysoundNo] = event;
     //Grabbing the relevant offset for the buffer.
     const convertedOffset = parseInt((offset*samplingRate)/1000)*channels*bytes;
-    const keysound = decodedKeysounds[keysoundNo];
+    const keysound = resampledKeysounds[keysoundNo];
 
     if (keysound) {
         const keysoundData = keysound.data;
@@ -121,3 +118,4 @@ filename = filename.slice(0, filename.indexOf("\u0000"));
 //I could manually generate a wav header, but I don't because I'm lazy.
 let writer = new wav.FileWriter("output\\"+outputFilename+".wav", {bitDepth: 32});
 writer.write(finalBuffer);
+});
