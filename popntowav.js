@@ -14,16 +14,15 @@ if (process.argv.length < 3) {
 }
 
 let arg1 = process.argv[2];
-let outputFilename = process.argv[3];
 
 child_process.execSync(`ifstools ${arg1}`);
 const ifsname = path.basename(arg1).slice(0, -4);
 let twodxPath = `${ifsname}_ifs/${ifsname}.2dx`;
-let chartPath = `${ifsname}_ifs/${ifsname}_op.bin`;
+let chartPath = `${ifsname}_ifs/${ifsname}_np.bin`;
 
-if (!fs.existsSync(chartPath)) {
-    chartPath = `${ifsname}_ifs/${ifsname}_hp.bin`;
-}
+let outputFilename = process.argv[3] || `${ifsname}.wav`;
+
+fs.mkdir("output", {recursive: true}, err => {if (err) throw err});
 
 let cleanUp = true;
 
@@ -116,6 +115,6 @@ let filename = soundContainer.name;
 filename = filename.slice(0, filename.indexOf("\u0000"));
 
 //I could manually generate a wav header, but I don't because I'm lazy.
-let writer = new wav.FileWriter("output\\"+outputFilename+".wav", {bitDepth: 32});
+let writer = new wav.FileWriter(path.join("output", outputFilename), {bitDepth: 32});
 writer.write(finalBuffer);
 });
