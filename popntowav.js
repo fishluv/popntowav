@@ -1,12 +1,13 @@
+const child_process = require("node:child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const LibSampleRate = require('@alexanderolsen/libsamplerate-js');
+const wav = require("wav");
+
 const MSADPCM = require("./msadpcm");
 const Popnchart = require("./popnchart");
 const Twodx = require("./twodx");
-
-const child_process = require("child_process");
-const fs = require("fs");
-const path = require("path");
-const LibSampleRate = require('@alexanderolsen/libsamplerate-js');
-const wav = require("wav");
 
 if (process.argv.length < 3) {
     console.log("Usage: node popntowav ifs_file");
