@@ -1,3 +1,6 @@
+> [!NOTE]
+> This fork replaces the outdated, broken `node-libsamplerate` dependency with one that is more up to date (`@alexanderolsen/libsamplerate-js`). Thanks to [Gi-z](https://github.com/Gi-z) for the original implementation. Original README below.
+
 # popntowav
 Tool for rendering pop'n music IFS/chart files to 32-bit PCM wav.
 
