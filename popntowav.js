@@ -31,7 +31,7 @@ let chart = new Popnchart(chartPath, !soundContainer.late_bg);
 //The sound container is full of MSADPCM keysounds, so each one needs decoded.
 let decodedKeysounds = soundContainer.keysounds.map((keysound) => MSADPCM.decodeKeysoundOut(keysound.data, keysound.unk2));
 
-if (cleanUp) fs.rmdirSync(path.basename(arg1).slice(0, -4)+"_ifs", {recursive: true});
+if (cleanUp) fs.rmSync(path.basename(arg1).slice(0, -4)+"_ifs", {recursive: true});
 
 let highestSample = 0;
 //Outputting stereo 44.1Khz regardless.
