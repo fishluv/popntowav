@@ -5,6 +5,7 @@ ifstools.exe
 .vscode/launch.json
 
 node_modules/
-output/
+*_ifs/
 
 *.ifs
+*.wav

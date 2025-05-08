@@ -9,30 +9,96 @@ const MSADPCM = require("./msadpcm");
 const Popnchart = require("./popnchart");
 const Twodx = require("./twodx");
 
-if (process.argv.length < 3) {
-    console.log("Usage: node popntowav ifs_file");
+const diffShortToLong = {
+    ep: "easy",
+    np: "normal",
+    hp: "hyper",
+    op: "ex",
+};
+
+const diffLongToShort = {
+    easy: "ep",
+    normal: "np",
+    hyper: "hp",
+    ex: "op",
+};
+
+function usageAndExit() {
+    console.log("Usage: node popntowav ifs_file [--easy|--normal|--hyper|--ex] [output_file]");
     process.exit();
 }
 
-let arg1 = process.argv[2];
+if (process.argv.length < 3) {
+    usageAndExit();
+}
 
-child_process.execSync(`ifstools ${arg1}`);
-const ifsname = path.basename(arg1).slice(0, -4);
-let twodxPath = `${ifsname}_ifs/${ifsname}.2dx`;
-let chartPath = `${ifsname}_ifs/${ifsname}_np.bin`;
+const ifsFile = process.argv[2];
+const ifsName = ifsFile.slice(0, -4); // Remove `.ifs` suffix
 
-let outputFilename = process.argv[3] || `${ifsname}.wav`;
+let difficulty, outputFile;
+if (process.argv.length === 3) {
+    difficulty = "normal";
+    outputFile = `${ifsName}_${difficulty}.wav`;
+    console.log(`ifs file: ${ifsFile}`);
+    console.log("difficulty not specified so defaulting to: normal");
+    console.log(`output file not specified so defaulting to: ${outputFile}`);
+}
 
-fs.mkdir("output", {recursive: true}, err => {if (err) throw err});
+if (process.argv.length === 4) {
+    if (["--easy", "--normal", "--hyper", "--ex"].includes(process.argv[3])) {
+        difficulty = process.argv[3].slice(2);
+        outputFile = `${ifsName}_${difficulty}.wav`;
+        console.log(`ifs file: ${ifsFile}`);
+        console.log(`difficulty: ${difficulty}`);
+        console.log(`output file not specified so defaulting to: ${outputFile}`);
+    } else {
+        difficulty = "normal";
+        outputFile = process.argv[3];
+        console.log(`ifs file: ${ifsFile}`);
+        console.log("difficulty not specified so defaulting to: normal");
+        console.log(`output file: ${outputFile}`);
+    }
+}
 
-let cleanUp = true;
+if (process.argv.length === 5) {
+    if (["--easy", "--normal", "--hyper", "--ex"].includes(process.argv[3])) {
+        difficulty = process.argv[3].slice(2);
+        outputFile = process.argv[4];
+        console.log(`ifs file: ${ifsFile}`);
+        console.log(`difficulty: ${difficulty}`);
+        console.log(`output file: ${outputFile}`);
+    } else {
+        usageAndExit();
+    }
+}
 
-let soundContainer = new Twodx(twodxPath);
-let chart = new Popnchart(chartPath, !soundContainer.late_bg);
+if (process.argv.length > 5) {
+    usageAndExit();
+}
+
+child_process.execSync(`ifstools ${ifsFile}`);
+
+const ifsDir = `${ifsName}_ifs`;
+
+const availableCharts =
+    Object.entries(diffShortToLong)
+        .filter(([short, _]) => fs.existsSync(path.join(ifsDir, `${ifsName}_${short}.bin`)))
+        .map(([_, long]) => long);
+if (!availableCharts.includes(difficulty)) {
+    console.log(`ifs file contains no ${difficulty} chart. available charts: ${availableCharts.join(", ")}`);
+    fs.rmSync(ifsDir, {recursive: true});
+    process.exit(1);
+}
+
+const twodxFile = path.join(ifsDir, `${ifsName}.2dx`);
+const chartFile = path.join(ifsDir, `${ifsName}_${diffLongToShort[difficulty]}.bin`);
+
+let soundContainer = new Twodx(twodxFile);
+let chart = new Popnchart(chartFile, !soundContainer.late_bg);
 //The sound container is full of MSADPCM keysounds, so each one needs decoded.
 let decodedKeysounds = soundContainer.keysounds.map((keysound) => MSADPCM.decodeKeysoundOut(keysound.data, keysound.unk2));
 
-if (cleanUp) fs.rmSync(path.basename(arg1).slice(0, -4)+"_ifs", {recursive: true});
+fs.rmSync(ifsDir, {recursive: true});
 
 let highestSample = 0;
 //Outputting stereo 44.1Khz regardless.
@@ -116,6 +182,6 @@ let filename = soundContainer.name;
 filename = filename.slice(0, filename.indexOf("\u0000"));
 
 //I could manually generate a wav header, but I don't because I'm lazy.
-let writer = new wav.FileWriter(path.join("output", outputFilename), {bitDepth: 32});
+let writer = new wav.FileWriter(outputFile, {bitDepth: 32});
 writer.write(finalBuffer);
 });
