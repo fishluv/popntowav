@@ -1,25 +1,17 @@
-> [!NOTE]
-> This fork replaces the outdated, broken `node-libsamplerate` dependency with one that is more up to date (`@alexanderolsen/libsamplerate-js`). Thanks to [Gi-z](https://github.com/Gi-z) for the original implementation. Original README below.
-
 # popntowav
+
 Tool for rendering pop'n music IFS/chart files to 32-bit PCM wav.
 
-## Dependencies
-
-Currently this tool relies on [IFSTools](https://github.com/mon/ifstools), which should be used either from an installed Python package, or through its exe distributions.
-Additionally, this tool uses the following node packages:
-  - wav
-  - node-libsamplerate (Requires C build tools to install)
+This fork ([original repo here](https://github.com/Gi-z/popntowav)) just fixes a broken dependency and makes the entrypoint script a little more user friendly. See acknowledgements below.
 
 ## Usage
-```node popntowav [IFS file]```
 
-I'll probably add further options for chart/container files not inside an IFS file at some point. Maybe some tweaking for desired sample rate, etc.
+```sh
+node popntowav ifs_file [--easy|--normal|--hyper|--ex] [output_file]
+```
+
+Use difficulty flags for songs with different audio for different difficulties, e.g. Neu. (If difficulty is omitted, normal will be used.)
 
 ## Acknowledgements
 
-Thanks to [Emi](https://github.com/EmiMidnight) and though for help with this nonsense.
-
-## License
-
-Yar har.
+Thanks to [Gi-z](https://github.com/Gi-z) for the original implementation. All chart parsing and wav rendering code was written by them. See original repo for [other acknowledgements](https://github.com/Gi-z/popntowav#acknowledgements).
