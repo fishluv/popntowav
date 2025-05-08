@@ -47,34 +47,23 @@ class PopnChart {
                 eventValue = joined.readUInt8(1);
             }
 
-            //Long note data isn't needed for GSTs, however it's here.
             if (newFormat) {
-                const longNoteData = this.data.readInt32LE(offset);
+                // This block is for hold note length.
+                // We don't need it, just skip over it.
+                this.data.readInt32LE(offset);
                 offset += 4;
             }
             
             this.events.push([eventOffset, eventFlag, eventParam, eventValue]);
         }
 
-        this.bpm = 0;
-        this.bpmTransitions = [];
-
         this.playEvents = [];
-        this.uniqueKeysounds = [];
-
-        this.notecount = 0;
 
         const sampleColumns = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         for (const event of this.events) {
             let [offset, eventType, param, value] = event;
 
-            if (eventType == 7 || eventType == 2) {
-                if (this.uniqueKeysounds.indexOf(param) == -1) {
-                    this.uniqueKeysounds.push(param);
-                }
-            }
-            
             switch (eventType) {
                 case 1:
                     //Playable note event.
@@ -82,7 +71,6 @@ class PopnChart {
                     if (sampleColumns[param] != 0) {
                         this.playEvents.push([offset, sampleColumns[param]]);
                     }
-                    this.notecount += 1;
                     break;
                 case 2:
                     //Sample change event.
@@ -94,11 +82,6 @@ class PopnChart {
                 case 3:
                     //BG track start event.
                     this.playEvents.push([offset, 0]);
-                    break;
-                case 4:
-                    //BPM change event.
-                    this.bpm = param;
-                    this.bpmTransitions.push(param);
                     break;
                 case 7:
                     //BG sample event.
