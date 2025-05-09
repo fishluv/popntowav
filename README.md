@@ -7,7 +7,8 @@ This fork ([original repo here](https://github.com/Gi-z/popntowav)) just fixes a
 ## Usage
 
 ```sh
-node popntowav [-i <ifs_file_or_dir> [--keep-ifs-dir] [-d <difficulty>]] [--bin-file <bin_file> --2dx-file <2dx_file>] [<output_file>]
+node popntowav [-i <ifs_file_or_dir> [-k] [-d <difficulty>]]
+        [-b <bin_file> -t <2dx_file>] [<output_file>]
 ```
 
 Supports two different modes:
