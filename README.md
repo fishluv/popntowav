@@ -7,10 +7,15 @@ This fork ([original repo here](https://github.com/Gi-z/popntowav)) just fixes a
 ## Usage
 
 ```sh
-node popntowav ifs_file [--easy|--normal|--hyper|--ex] [output_file]
+node popntowav [-i <ifs_file_or_dir> [--keep-ifs-dir] [-d <difficulty>]] [--bin-file <bin_file> --2dx-file <2dx_file>] [<output_file>]
 ```
 
-Use difficulty flags for songs with different audio for different difficulties, e.g. Neu. (If difficulty is omitted, normal will be used.)
+Supports two different modes:
+
+1. `ifs mode` - **Specify .ifs file or \_ifs/ directory.** Optionally specify a chart difficulty. (Useful for songs with different audio for different difficulties, e.g. Neu. If omitted, difficulty will default to normal.)
+2. `bin/2dx mode` - **Specify .bin file and .2dx file.** (No difficulty needed since a .bin file already maps to a single difficulty.)
+
+See `node popntowav -h` for more details.
 
 ## Acknowledgements
 
