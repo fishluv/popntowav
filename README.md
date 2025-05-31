@@ -18,6 +18,10 @@ Supports two different modes:
 
 See `node popntowav -h` for more details.
 
+## Known issues
+
+Some keysounds are rendered at the wrong volume relative to other keysounds. This issue is especially noticeable in e.g. POPS (hyper) and murmur twins (ex). This likely has something to do with the `audio_param` values in the game's musicdb.
+
 ## Acknowledgements
 
 Thanks to [Gi-z](https://github.com/Gi-z) for the original implementation. All chart parsing and wav rendering code was written by them. See original repo for [other acknowledgements](https://github.com/Gi-z/popntowav#acknowledgements).
